@@ -10,6 +10,8 @@ class Trainer:
         self.loss_fn = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-3)
 
+        self.model.to(self.device)
+
         self.rho = 0.1
         self.sr = 0.2
         self.phi = 0.6
@@ -24,7 +26,7 @@ class Trainer:
         self.eta = 1e-3
 
         point_density = 100
-        grid = torch.linspace(0,1,point_density)
+        grid = torch.linspace(0,1,point_density,device=self.device)
         grid1, grid2, grid3 = torch.meshgrid([grid,grid,grid])
 
         grid1_flattened = torch.flatten(grid1)
@@ -74,7 +76,7 @@ class Trainer:
         return self.phi*C*u_t - kr*(self.Lambda_x*u_xx+self.Lambda_y*u_yy+self.Lambda_z*u_zz) - a*C*(self.Lambda_x*u_x**2+self.Lambda_y*u_y**2+self.Lambda_z*u_z**2)
 
     def train_update(self):
-        points_PINN = torch.rand(100,4).requires_grad_()
+        points_PINN = torch.rand(100,4,device=self.device).requires_grad_()
     
         res = self.residual(points_PINN)
         initial = self.model(self.initial_points)
@@ -119,11 +121,6 @@ class Trainer:
         self.lambda_initial = (1-self.alpha)*self.lambda_initial+self.alpha*lambda_initial_new
         self.lambda_boundary = (1-self.alpha)*self.lambda_boundary+self.alpha*lambda_boundary_new
 
-        #with torch.no_grad():
-            #for i, parameter in enumerate(self.model.parameters()):
-                #step = self.eta*grads_pinn[i] + self.eta*(self.lambda_initial*grads_initial[i]+self.lambda_boundary*grads_boundary[i])
-                #parameter.sub_(step)
-
         loss = loss_pinn + self.lambda_initial*loss_initial + self.lambda_boundary*loss_boundary
     
         loss.backward()
@@ -138,3 +135,6 @@ class Trainer:
         for epoch in range(n_epochs):
             print(f"Epoch {epoch+1}:")
             self.train_update()
+
+    def save_weights(self):
+        torch.save(self.model.state_dict(),"weights.pt")
