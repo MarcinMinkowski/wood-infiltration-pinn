@@ -33,7 +33,7 @@ class Trainer:
         grid2_flattened = torch.flatten(grid2)
         grid3_flattened = torch.flatten(grid3)
 
-        self.initial_points = torch.stack([grid1_flattened,grid2_flattened,grid3_flattened,torch.zeros(point_density**3)],axis=-1)
+        self.initial_points = torch.stack([grid1_flattened,grid2_flattened,grid3_flattened,torch.zeros(point_density**3,device=self.device)],axis=-1)
 
         grid1, grid2, grid_t = torch.meshgrid([grid,grid,grid[1:]])
 
@@ -41,12 +41,12 @@ class Trainer:
         grid2_flattened = torch.flatten(grid2)
         grid_t_flattened = torch.flatten(grid_t)
 
-        bottom_points = torch.stack([grid1_flattened,grid2_flattened,torch.zeros(point_density**2*(point_density-1)),grid_t_flattened],axis=-1)
-        top_points = torch.stack([grid1_flattened,grid2_flattened,torch.ones(point_density**2*(point_density-1)),grid_t_flattened],axis=-1)
-        left_points = torch.stack([torch.zeros(point_density**2*(point_density-1)),grid1_flattened,grid2_flattened,grid_t_flattened],axis=-1)
-        right_points = torch.stack([torch.ones(point_density**2*(point_density-1)),grid1_flattened,grid2_flattened,grid_t_flattened],axis=-1)
-        front_points = torch.stack([grid1_flattened,torch.zeros(point_density**2*(point_density-1)),grid2_flattened,grid_t_flattened],axis=-1)
-        back_points = torch.stack([grid1_flattened,torch.ones(point_density**2*(point_density-1)),grid2_flattened,grid_t_flattened],axis=-1)
+        bottom_points = torch.stack([grid1_flattened,grid2_flattened,torch.zeros(point_density**2*(point_density-1),device=self.device),grid_t_flattened],axis=-1)
+        top_points = torch.stack([grid1_flattened,grid2_flattened,torch.ones(point_density**2*(point_density-1),device=self.device),grid_t_flattened],axis=-1)
+        left_points = torch.stack([torch.zeros(point_density**2*(point_density-1),device=self.device),grid1_flattened,grid2_flattened,grid_t_flattened],axis=-1)
+        right_points = torch.stack([torch.ones(point_density**2*(point_density-1),device=self.device),grid1_flattened,grid2_flattened,grid_t_flattened],axis=-1)
+        front_points = torch.stack([grid1_flattened,torch.zeros(point_density**2*(point_density-1),device=self.device),grid2_flattened,grid_t_flattened],axis=-1)
+        back_points = torch.stack([grid1_flattened,torch.ones(point_density**2*(point_density-1),device=self.device),grid2_flattened,grid_t_flattened],axis=-1)
 
         self.boundary_points = torch.cat([bottom_points,top_points,left_points,right_points,front_points,back_points])
 
