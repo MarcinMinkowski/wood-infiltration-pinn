@@ -50,6 +50,21 @@ class Trainer:
 
         self.boundary_points = torch.cat([bottom_points,top_points,left_points,right_points,front_points,back_points])
 
+    def generate_initial_points(self,n_points):
+        initial_points = torch.rand((n_points,4),device=self.device)
+        initial_points[:,3] = 0
+
+        return initial_points
+    
+    def generate_boundary_points(self,n_points):
+        boundary_points = torch.rand((n_points,4),device=self.device)
+        idx = torch.arange(n_points)
+        boundary_axis = torch.randint(0,3,(n_points,))
+        boundary_side = torch.randint(0,2,(n_points,)).float()
+        boundary_points[idx,boundary_axis] = boundary_side
+
+        return boundary_points
+
     def residual(self, X):
         u = self.model(X)
     
@@ -77,10 +92,12 @@ class Trainer:
 
     def train_update(self):
         points_PINN = torch.rand(100,4,device=self.device).requires_grad_()
+        initial_points = self.generate_initial_points(100)
+        boundary_points = self.generate_boundary_points(100)
     
         res = self.residual(points_PINN)
-        initial = self.model(self.initial_points)
-        boundary = self.model(self.boundary_points)
+        initial = self.model(initial_points)
+        boundary = self.model(boundary_points)
     
         loss_pinn = self.loss_fn(res,torch.zeros_like(res))
         loss_initial = self.loss_fn(initial,torch.full_like(initial,-1.0))
