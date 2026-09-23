@@ -58,9 +58,9 @@ class Trainer:
     
     def generate_boundary_points(self,n_points):
         boundary_points = torch.rand((n_points,4),device=self.device)
-        idx = torch.arange(n_points)
-        boundary_axis = torch.randint(0,3,(n_points,))
-        boundary_side = torch.randint(0,2,(n_points,)).float()
+        idx = torch.arange(n_points,device=self.device)
+        boundary_axis = torch.randint(0,3,(n_points,),device=self.device)
+        boundary_side = torch.randint(0,2,(n_points,),device=self.device).float()
         boundary_points[idx,boundary_axis] = boundary_side
 
         return boundary_points
